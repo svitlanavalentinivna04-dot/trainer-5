@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Інтерактивний тренажер: Тайм-менеджмент секретаря</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #0f172a;
+      --accent: #d97706;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text: #334155;
+      --text-dark: #0f172a;
+      --success: #16a34a;
+      --warning: #ea580c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 60px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: white;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: #f8fafc;
+    }
+
+    header p {
+      color: #94a3b8;
+      max-width: 800px;
+      margin: 0 auto;
+      font-size: 1rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Tabs Navigation */
+    .nav-tabs {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 2rem;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 0.8rem 1.5rem;
+      border: none;
+      background: none;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--primary);
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    /* Tab Contents */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      color: var(--text-dark);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .badge {
+      background: #e0e7ff;
+      color: #3730a3;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .task-condition {
+      background: #f1f5f9;
+      border-left: 4px solid var(--primary);
+      padding: 1rem 1.2rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 1.2rem;
+      font-size: 0.95rem;
+    }
+
+    .question-box {
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 0.8rem;
+    }
+
+    textarea {
+      width: 100%;
+      height: 110px;
+      padding: 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.7rem 1.4rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-outline:hover {
+      background: #f1f5f9;
+    }
+
+    /* Reference Answer Section */
+    .reference-answer {
+      display: none;
+      margin-top: 1.2rem;
+      padding: 1.2rem;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+    }
+
+    .reference-answer.active {
+      display: block;
+    }
+
+    .reference-answer h4 {
+      color: var(--success);
+      margin-bottom: 0.5rem;
+    }
+
+    .reference-answer ul {
+      margin-left: 1.2rem;
+      font-size: 0.95rem;
+    }
+
+    .reference-answer li {
+      margin-bottom: 0.4rem;
+    }
+
+    /* Interactive Matrix Game */
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .matrix-quadrant {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      min-height: 180px;
+      background: #fafafa;
+    }
+
+    .matrix-quadrant h4 {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.8rem;
+    }
+
+    .q1 { border-color: #fca5a5; background: #fff5f5; }
+    .q1 h4 { color: #991b1b; }
+    
+    .q2 { border-color: #93c5fd; background: #eff6ff; }
+    .q2 h4 { color: #1e40af; }
+
+    .q3 { border-color: #fde047; background: #fefce8; }
+    .q3 h4 { color: #854d0e; }
+
+    .q4 { border-color: #cbd5e1; background: #f8fafc; }
+    .q4 h4 { color: #475569; }
+
+    .task-pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: #f1f5f9;
+      border-radius: 8px;
+    }
+
+    .draggable-item {
+      background: white;
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      user-select: none;
+    }
+
+    .draggable-item.selected {
+      border-color: var(--primary);
+      background: #eff6ff;
+      font-weight: 600;
+    }
+
+    /* Meeting Constructor */
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: white;
+      border: 1px solid var(--border);
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+    }
+
+    .step-time {
+      font-weight: 700;
+      color: var(--primary);
+      min-width: 100px;
+    }
+
+    .step-select {
+      flex-grow: 1;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    /* Certificate / Report */
+    .report-card {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: white;
+      border: 2px solid var(--primary);
+      border-radius: 16px;
+    }
+
+    .score-badge {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin: 1rem 0;
+    }
+
+    /* Print styles */
+    @media print {
+      body { background: white; }
+      header, .nav-tabs, .btn, textarea { display: none; }
+      .reference-answer { display: block !important; }
+    }
+
+    @media (max-width: 768px) {
+      .matrix-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Інтерактивний тренажер секретаря</h1>
+    <p>Тема: Планування та організація робочого часу. Оперативні доручення керівника</p>
+  </header>
+
+  <div class="container">
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('cases')">1. Практиційні кейси</button>
+      <button class="tab-btn" onclick="switchTab('matrix')">2. Матриця Ейзенхауера</button>
+      <button class="tab-btn" onclick="switchTab('meeting')">3. Конструктор наради</button>
+      <button class="tab-btn" onclick="switchTab('summary')">4. Підсумковий звіт</button>
+    </nav>
+
+    <!-- MODULE 1: CASES -->
+    <div id="cases" class="tab-content active">
+      
+      <!-- Task 1 -->
+      <div class="card" id="card-task1">
+        <div class="card-title">
+          <span class="badge">Завдання 1</span>
+          Термінова підготовка та реєстрація наказу керівника
+        </div>
+        <div class="task-condition">
+          <strong>Умова:</strong> О 10:15 керівник викликав секретаря й дав термінове доручення: протягом 45 хвилин підготувати проєкт наказу «Про внесення змін до внутрішнього розпорядку роботи в умовах аварійного відключення електроенергії», підписати його в директора та розіслати керівникам усіх 6 структурних підрозділів. У цей же час у секретаря заплановано поточне відправлення вихідної пошти.
+        </div>
+        <div class="question-box">
+          Запитання: Як секретар має розставити пріоритети, організувати процес підготовки й розсилки наказу та оптимізувати свій час згідно з правилами тайм-менеджменту?
+        </div>
+        <textarea id="ans-task1" placeholder="Введіть Вашу відповідь або алгоритм дій секретаря..."></textarea>
+        <div>
+          <button class="btn" onclick="submitCase('task1')">Зберегти та перевірити</button>
+        </div>
+        <div class="reference-answer" id="ref-task1">
+          <h4>Еталонний розв'язок:</h4>
+          <ul>
+            <li><strong>Пріоритети:</strong> Доручення керівника має категорію «Терміново і важливо» (пріоритет №1). Відправку вихідної пошти переноситься на другу половину дня.</li>
+            <li><strong>Оптимізація:</strong> Використати готовий електронний шаблон наказу підприємства.</li>
+            <li><strong>Погодження:</strong> Подати проєкт на підпис керівнику відразу після підготовки (опрацювання з першого прочитання).</li>
+            <li><strong>Розсилка:</strong> Зареєструвати наказ і зробити одночасну масову електронну розсилку керівникам 6 підрозділів.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Task 2 -->
+      <div class="card" id="card-task2">
+        <div class="card-title">
+          <span class="badge">Завдання 2</span>
+          Складання та відправка листа-звернення в держоргани
+        </div>
+        <div class="task-condition">
+          <strong>Умова:</strong> Об 11:30 керівник доручив секретарю до 13:00 скласти та відправити офіційний лист-звернення до Міської ради щодо надання дозволу на проведення ремонтних робіт на прилеглій території підприємства. Керівник дав лише короткі усні тези.
+        </div>
+        <div class="question-box">
+          Запитання: Які правила роботи з документами та економії часу повинен застосувати секретар, щоб якісно підготувати лист-звернення у стислий термін?
+        </div>
+        <textarea id="ans-task2" placeholder="Введіть Вашу відповідь..."></textarea>
+        <div>
+          <button class="btn" onclick="submitCase('task2')">Зберегти та перевірити</button>
+        </div>
+        <div class="reference-answer" id="ref-task2">
+          <h4>Еталонний розв'язок:</h4>
+          <ul>
+            <li><strong>Фіксація:</strong> Зафіксувати всі тези керівника письмово в блокноті.</li>
+            <li><strong>Бланк:</strong> Оформити лист на офіційному бланку з дотриманням обов'язкових реквізитів.</li>
+            <li><strong>Структура:</strong> Дотримуватися чіткої структури (вступ, обґрунтування, прохальна частина).</li>
+            <li><strong>Відправка:</strong> Використати систему електронного документообігу чи e-mail з підтвердженням прочитання замість тривалої кур'єрської доставки.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Task 3 -->
+      <div class="card" id="card-task3">
+        <div class="card-title">
+          <span class="badge">Завдання 3</span>
+          Організація термінової наради та формування порядку денного
+        </div>
+        <div class="task-condition">
+          <strong>Умова:</strong> О 14:00 керівник повідомив секретаря, що о 15:30 необхідно провести термінову нараду з керівниками відділів (6 осіб) щодо форс-мажорної затримки постачання сировини. Керівник доручив сформувати порядок денний, оповістити всіх учасників і підготувати зал засідань.
+        </div>
+        <div class="question-box">
+          Запитання: Розробіть орієнтовний порядок денний наради та розпишіть кроки секретаря з її експрес-організації за 1,5 години.
+        </div>
+        <textarea id="ans-task3" placeholder="Введіть Вашу відповідь..."></textarea>
+        <div>
+          <button class="btn" onclick="submitCase('task3')">Зберегти та перевірити</button>
+        </div>
+        <div class="reference-answer" id="ref-task3">
+          <h4>Еталонний розв'язок:</h4>
+          <ul>
+            <li><strong>Порядок денний:</strong> 1. Аналіз причин затримки сировини (7 хв). 2. Перерозподіл наявних резервів (10 хв). 3. Інформування контрагентів та зміна термінів (8 хв). 4. Підсумки та призначення відповідальних (5 хв).</li>
+            <li><strong>Кроки секретаря:</strong> Затвердити порядок денний → розіслати e-mail/месенджером → зробити експрес-обдзвін (блок дзвінків) → підготувати зал засідань (обладнання, вода, папір) → зустріти учасників.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Task 4 -->
+      <div class="card" id="card-task4">
+        <div class="card-title">
+          <span class="badge">Завдання 4</span>
+          Опрацювання оперативних доручень під час роботи з відвідувачами
+        </div>
+        <div class="task-condition">
+          <strong>Умова:</strong> Керівник дав доручення секретарю терміново зв'язатися з юридичним відділом і вимагати довідку за судовим позовом, яка потрібна через 20 хвилин. У цей момент у приймальні перебуває ключовий інвестор компанії, який прибув на заплановану зустріч, але керівник затримується.
+        </div>
+        <div class="question-box">
+          Запитання: Як секретар має виконати термінове доручення керівника та водночас дотриматися етикету прийому VIP-гостя?
+        </div>
+        <textarea id="ans-task4" placeholder="Введіть Вашу відповідь..."></textarea>
+        <div>
+          <button class="btn" onclick="submitCase('task4')">Зберегти та перевірити</button>
+        </div>
+        <div class="reference-answer" id="ref-task4">
+          <h4>Еталонний розв'язок:</h4>
+          <ul>
+            <li><strong>Увага гостю (перші 30 сек):</strong> Ввічливо привітати інвестора, запропонувати місце в зоні очікування, каву/чай та пояснити, що керівник завершує важливий дзвінок і звільниться через 5–7 хвилин.</li>
+            <li><strong>Терміновий дзвінок:</strong> Одразу після цього зателефонувати юрисконсульту (не йти особисто) і передати вимогу про довідку на e-mail.</li>
+            <li><strong>Контроль:</strong> Зафіксувати завдання в органайзері та контролювати його виконання.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Task 5 -->
+      <div class="card" id="card-task5">
+        <div class="card-title">
+          <span class="badge">Завдання 5</span>
+          Перепланування робочого дня після форс-мажорного доручення
+        </div>
+        <div class="task-condition">
+          <strong>Умова:</strong> О 11:00 керівник викликає секретаря й доручає терміново до кінця дня підготувати повну папку документів для участі компанії в тендері (збирання довідок, копіювання Статуту, завірення підписами, підготовка специфікацій). Завдання вимагає 3,5–4 годин.
+        </div>
+        <div class="question-box">
+          Запитання: Які зміни секретар повинен внести у свій попередньо складений план на другу половину дня згідно з правилами самоменеджменту?
+        </div>
+        <textarea id="ans-task5" placeholder="Введіть Вашу відповідь..."></textarea>
+        <div>
+          <button class="btn" onclick="submitCase('task5')">Зберегти та перевірити</button>
+        </div>
+        <div class="reference-answer" id="ref-task5">
+          <h4>Еталонний розв'язок:</h4>
+          <ul>
+            <li><strong>Пріоритети:</strong> Тендерні документи переводяться в категорію «А» (найважливіші).</li>
+            <li><strong>Перенесення рутини:</strong> Рутинні справи (архівування, розбір старих паперів) переносяться на наступний день.</li>
+            <li><strong>Фільтрація дзвінків:</strong> Залучити колегу/молодшого секретаря для перехоплення телефонних ліній, щоб не відволікатися.</li>
+            <li><strong>Резерв часу:</strong> Використати 40% незапланованого резерву часу, передбаченого правилом 60/40.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MODULE 2: EISENHOWER MATRIX -->
+    <div id="matrix" class="tab-content">
+      <div class="card">
+        <div class="card-title">
+          Тренінг: Розподіл завдань за Матрицею Ейзенхауера
+        </div>
+        <p style="margin-bottom: 1rem; font-size: 0.95rem;">
+          Клікніть на завдання зі списку, а потім клікніть на відповідний квадрант, куди його потрібно помістити.
+        </p>
+
+        <div class="task-pool" id="task-pool">
+          <div class="draggable-item" data-id="1" onclick="selectItem(this)">1. Терміновий наказ про режим роботи (поломка)</div>
+          <div class="draggable-item" data-id="2" onclick="selectItem(this)">2. Підготовка матеріалів до щотижневої наради у вівторок</div>
+          <div class="draggable-item" data-id="3" onclick="selectItem(this)">3. Дзвінок з пропозицією канцелярських товарів</div>
+          <div class="draggable-item" data-id="4" onclick="selectItem(this)">4. Перегляд новинних сайтів та месенджерів</div>
+          <div class="draggable-item" data-id="5" onclick="selectItem(this)">5. Оформлення листа до Міськради (термін сьогодні)</div>
+          <div class="draggable-item" data-id="6" onclick="selectItem(this)">6. Систематизація електронного архіву документів</div>
+        </div>
+
+        <div class="matrix-grid">
+          <div class="matrix-quadrant q1" onclick="placeInQuadrant('q1')">
+            <h4>A. Терміново & Важливо (Зробити негайно)</h4>
+            <div class="quadrant-content" id="q1-content"></div>
+          </div>
+          <div class="matrix-quadrant q2" onclick="placeInQuadrant('q2')">
+            <h4>B. Не терміново & Важливо (Запланувати)</h4>
+            <div class="quadrant-content" id="q2-content"></div>
+          </div>
+          <div class="matrix-quadrant q3" onclick="placeInQuadrant('q3')">
+            <h4>C. Терміново & Не важливо (Делегувати/Швидко)</h4>
+            <div class="quadrant-content" id="q3-content"></div>
+          </div>
+          <div class="matrix-quadrant q4" onclick="placeInQuadrant('q4')">
+            <h4>D. Не терміново & Не важливо (Видалити/Хронофаги)</h4>
+            <div class="quadrant-content" id="q4-content"></div>
+          </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; text-align: right;">
+          <button class="btn" onclick="checkMatrix()">Перевірити матрицю</button>
+        </div>
+        <div id="matrix-feedback" style="margin-top: 1rem; font-weight: 600;"></div>
+      </div>
+    </div>
+
+    <!-- MODULE 3: MEETING CONSTRUCTOR -->
+    <div id="meeting" class="tab-content">
+      <div class="card">
+        <div class="card-title">
+          Симулятор: Організація термінової наради за 1.5 години (14:00 - 15:30)
+        </div>
+        <p style="margin-bottom: 1rem;">Розподіліть послідовність дій секретаря за часовими інтервалами:</p>
+
+        <div class="step-list">
+          <div class="step-item">
+            <span class="step-time">14:00 – 14:15</span>
+            <select class="step-select" id="step1">
+              <option value="0">-- Оберіть дію --</option>
+              <option value="1">Підготовка залу засідань, перевірка обладнання та води</option>
+              <option value="2">Затвердження порядку денного у керівника та його розсилка учасникам</option>
+              <option value="3">Дзвінки для підтвердження присутності учасників</option>
+              <option value="4">Зустріч учасників біля входу до залу засідань</option>
+            </select>
+          </div>
+
+          <div class="step-item">
+            <span class="step-time">14:15 – 14:30</span>
+            <select class="step-select" id="step2">
+              <option value="0">-- Оберіть дію --</option>
+              <option value="1">Підготовка залу засідань, перевірка обладнання та води</option>
+              <option value="2">Затвердження порядку денного у керівника та його розсилка учасникам</option>
+              <option value="3">Дзвінки для підтвердження присутності учасників</option>
+              <option value="4">Зустріч учасників біля входу до залу засідань</option>
+            </select>
+          </div>
+
+          <div class="step-item">
+            <span class="step-time">14:30 – 15:00</span>
+            <select class="step-select" id="step3">
+              <option value="0">-- Оберіть дію --</option>
+              <option value="1">Підготовка залу засідань, перевірка обладнання та води</option>
+              <option value="2">Затвердження порядку денного у керівника та його розсилка учасникам</option>
+              <option value="3">Дзвінки для підтвердження присутності учасників</option>
+              <option value="4">Зустріч учасників біля входу до залу засідань</option>
+            </select>
+          </div>
+
+          <div class="step-item">
+            <span class="step-time">15:00 – 15:30</span>
+            <select class="step-select" id="step4">
+              <option value="0">-- Оберіть дію --</option>
+              <option value="1">Підготовка залу засідань, перевірка обладнання та води</option>
+              <option value="2">Затвердження порядку денного у керівника та його розсилка учасникам</option>
+              <option value="3">Дзвінки для підтвердження присутності учасників</option>
+              <option value="4">Родрукування проектів рішень та зустріч учасників</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn" onclick="checkMeetingSchedule()">Перевірити графік</button>
+        <div id="meeting-feedback" style="margin-top: 1rem; font-weight: 600;"></div>
+      </div>
+    </div>
+
+    <!-- MODULE 4: SUMMARY & REPORT -->
+    <div id="summary" class="tab-content">
+      <div class="card report-card">
+        <h2>Підсумковий протокол виконання практичних завдань</h2>
+        <p style="color: #64748b; margin-top: 0.5rem;">Результати роботи з інструкційно-технологічною карткою</p>
+        
+        <div class="score-badge" id="total-score">0 / 5</div>
+        <p id="completion-text">Заповніть відповіді у розділі «Практиційні кейси» та виконайте інтерактивні завдання.</p>
+
+        <div style="margin-top: 2rem; display: flex; justify-content: center; gap: 1rem;">
+          <button class="btn" onclick="window.print()">Завантажити / Родрукувати звіт</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+
+      if (tabId === 'summary') {
+        updateSummary();
+      }
+    }
+
+    // Case Submission
+    let completedCases = new Set();
+
+    function submitCase(taskId) {
+      const ans = document.getElementById('ans-' + taskId).value.trim();
+      if (ans.length < 10) {
+        alert('Будь ласка, введіть більш розгорнуту відповідь (мінімум кілька слів).');
+        return;
+      }
+
+      document.getElementById('ref-' + taskId).classList.add('active');
+      completedCases.add(taskId);
+      alert('Відповідь збережено! Нижче відкрився еталонний розв\'язок для самоперевірки.');
+    }
+
+    // Matrix Game Logic
+    let selectedItem = null;
+    const correctMatrix = {
+      '1': 'q1',
+      '2': 'q2',
+      '3': 'q3',
+      '4': 'q4',
+      '5': 'q1',
+      '6': 'q2'
+    };
+    let userMatrix = {};
+
+    function selectItem(el) {
+      document.querySelectorAll('.draggable-item').forEach(i => i.classList.remove('selected'));
+      selectedItem = el;
+      el.classList.add('selected');
+    }
+
+    function placeInQuadrant(quadrantId) {
+      if (!selectedItem) return;
+      
+      const quadContent = document.getElementById(quadrantId + '-content');
+      quadContent.appendChild(selectedItem);
+      
+      const itemId = selectedItem.getAttribute('data-id');
+      userMatrix[itemId] = quadrantId;
+
+      selectedItem.classList.remove('selected');
+      selectedItem = null;
+    }
+
+    function checkMatrix() {
+      let correct = 0;
+      let total = Object.keys(correctMatrix).length;
+
+      for (let id in correctMatrix) {
+        if (userMatrix[id] === correctMatrix[id]) {
+          correct++;
+        }
+      }
+
+      const feedback = document.getElementById('matrix-feedback');
+      if (correct === total) {
+        feedback.style.color = 'var(--success)';
+        feedback.innerText = `Відмінно! Всі ${total} завдань правильно розподілені по квадрантах!`;
+      } else {
+        feedback.style.color = 'var(--warning)';
+        feedback.innerText = `Правильно розподілено: ${correct} з ${total}. Спробуйте переставити деякі елементи.`;
+      }
+    }
+
+    // Meeting Schedule Logic
+    function checkMeetingSchedule() {
+      const s1 = document.getElementById('step1').value;
+      const s2 = document.getElementById('step2').value;
+      const s3 = document.getElementById('step3').value;
+      const s4 = document.getElementById('step4').value;
+
+      const feedback = document.getElementById('meeting-feedback');
+
+      if (s1 === '2' && s2 === '3' && s3 === '1' && s4 === '4') {
+        feedback.style.color = 'var(--success)';
+        feedback.innerText = 'Вітаємо! Хронологію та алгоритм організації термінової наради складено абсолютно вірно!';
+      } else {
+        feedback.style.color = 'var(--warning)';
+        feedback.innerText = 'Послідовність містить помилки. Зверніть увагу: спочатку сповіщення та погодження, потім обдзвін і підготовка залу.';
+      }
+    }
+
+    // Summary Update
+    function updateSummary() {
+      const count = completedCases.size;
+      document.getElementById('total-score').innerText = `${count} / 5`;
+
+      const text = document.getElementById('completion-text');
+      if (count === 5) {
+        text.innerText = 'Чудова робота! Ви опрацювали всі практичні кейси з інструкційно-технологічної картки.';
+        text.style.color = 'var(--success)';
+      } else {
+        text.innerText = `Ви опрацювали ${count} з 5 практичних кейсів. Повернутися до виконання можна у першій вкладці.`;
+      }
+    }
+  </script>
+</body>
+</html>
